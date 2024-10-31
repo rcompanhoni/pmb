@@ -4,6 +4,7 @@ import {
   getCommentsByPostId,
   createComment,
   updateComment,
+  deleteComment,
 } from './commentsController';
 import * as commentsRepository from '../../repositories/comments/commentsRepository';
 import { Comment, commentSchema } from '../../repositories/comments/types';
@@ -234,6 +235,74 @@ describe('commentsController', () => {
       );
 
       await updateComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    });
+  });
+
+  describe('deleteComment', () => {
+    it('should delete a comment and return status 200 if valid post ID, comment ID, and token are provided', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { jwtToken: 'valid_token' };
+      (commentsRepository.deleteComment as jest.Mock).mockResolvedValue({
+        id: '1',
+      });
+
+      await deleteComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
+    });
+
+    it('should return status 400 if post ID or comment ID is missing', async () => {
+      req.params = { id: '', commentId: '' };
+      req.body = { jwtToken: 'valid_token' };
+
+      await deleteComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return status 401 if token is missing', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { jwtToken: undefined };
+
+      await deleteComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
+    });
+
+    it('should return status 404 if comment is not found', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { jwtToken: 'valid_token' };
+      (commentsRepository.deleteComment as jest.Mock).mockResolvedValue(null);
+
+      await deleteComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { jwtToken: 'valid_token' };
+      (commentsRepository.deleteComment as jest.Mock).mockRejectedValue(
+        new Error('Internal error'),
+      );
+
+      await deleteComment(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(
         StatusCodes.INTERNAL_SERVER_ERROR,

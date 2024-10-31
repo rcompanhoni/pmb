@@ -128,3 +128,42 @@ export const updateComment = async (
     });
   }
 };
+
+export const deleteComment = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id: postId, commentId } = req.params;
+    if (!postId || !commentId) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: 'Post ID and Comment ID are required' });
+      return;
+    }
+
+    const token = req.body.jwtToken;
+    if (!token) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token is missing' });
+      return;
+    }
+
+    const deletedComment = await commentsRepository.deleteComment(
+      commentId,
+      token,
+    );
+    if (deletedComment) {
+      res
+        .status(StatusCodes.OK)
+        .json({ message: 'Comment deleted successfully' });
+    } else {
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Comment not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting comment', { error });
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'An error occurred while deleting the comment.',
+    });
+  }
+};

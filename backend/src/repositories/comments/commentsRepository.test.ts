@@ -3,6 +3,7 @@ import {
   getCommentsByPostId,
   createComment,
   updateComment,
+  deleteComment,
 } from './commentsRepository';
 import { Comment } from './types';
 
@@ -18,6 +19,8 @@ describe('commentsRepository', () => {
   let consoleErrorMock: jest.SpyInstance;
 
   const postId = '6a6c8b6c-6787-45b4-8332-ca5aa204ba9e';
+  const commentId = 'e1f1baa1-c2b4-4d08-8a42-3901ed5d8f68';
+
   const mockComment: Comment = {
     id: '1',
     post_id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
@@ -145,6 +148,53 @@ describe('commentsRepository', () => {
       });
 
       const result = await updateComment(postId, mockComment, 'valid_token');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('deleteComment', () => {
+    it('should return the deleted comment data if no error occurs', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        delete: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: mockComment, error: null }),
+      });
+
+      const result = await deleteComment(commentId, 'valid_token');
+      expect(result).toEqual(mockComment);
+    });
+
+    it('should return null and log an error if an error occurs during deletion', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        delete: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Some error' },
+        }),
+      });
+
+      const result = await deleteComment(commentId, 'valid_token');
+      expect(result).toBeNull();
+    });
+
+    it('should return null if no data is found after deletion', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        delete: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      });
+
+      const result = await deleteComment(
+        'non-existent-comment-id',
+        'valid_token',
+      );
       expect(result).toBeNull();
     });
   });

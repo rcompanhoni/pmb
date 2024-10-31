@@ -56,3 +56,21 @@ export const updateComment = async (
 
   return data;
 };
+
+export const deleteComment = async (commentId: string, token: string) => {
+  const { data, error } = await supabase
+    .from('comments')
+    .delete()
+    .eq('id', commentId)
+    .setHeader('Authorization', `Bearer ${token}`)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error(
+      `Error at commentsRepository.deleteComment: ${error.message}`,
+    );
+  }
+
+  return data;
+};
