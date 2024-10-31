@@ -1,5 +1,10 @@
 import { supabase } from '../../config/supabaseClient';
-import { getAllPosts, getPostById, createPost } from './postsRepository';
+import {
+  getAllPosts,
+  getPostById,
+  createPost,
+  updatePost,
+} from './postsRepository';
 import { Post } from './types';
 
 // Supabase client mock
@@ -112,6 +117,37 @@ describe('postsRepository', () => {
       });
 
       const result = await createPost(mockPost, 'valid_token');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('updatePost', () => {
+    it('should return the updated post data if no error occurs', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: mockPost, error: null }),
+      });
+
+      const result = await updatePost('1', mockPost, 'valid_token');
+      expect(result).toEqual(mockPost);
+    });
+
+    it('should return null if an error occurs during post update', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Some error' },
+        }),
+      });
+
+      const result = await updatePost('1', mockPost, 'valid_token');
       expect(result).toBeNull();
     });
   });

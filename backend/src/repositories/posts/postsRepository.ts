@@ -37,3 +37,19 @@ export const createPost = async (post: Post, token: string) => {
 
   return data;
 };
+
+export const updatePost = async (id: string, post: Post, token: string) => {
+  const { data, error } = await supabase
+    .from('posts')
+    .update(post)
+    .eq('id', id)
+    .setHeader('Authorization', `Bearer ${token}`)
+    .select('*') // returns the updated post
+    .single();
+
+  if (error) {
+    console.error(`Error at postsRepository.updatePost: ${error.message}`);
+  }
+
+  return data;
+};

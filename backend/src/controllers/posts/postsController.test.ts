@@ -1,16 +1,35 @@
 import { Request, Response } from 'express';
 import { ZodError, ZodIssue } from 'zod';
-import { getPosts, getPost, createPost } from './postController';
-import * as postsRepository from '../repositories/posts/postsRepository';
+import { getPosts, getPost, createPost, updatePost } from './postsController';
+import * as postsRepository from '../../repositories/posts/postsRepository';
 import { StatusCodes } from 'http-status-codes';
-import { Post, postSchema } from '../repositories/posts/types';
+import { Post, postSchema } from '../../repositories/posts/types';
 
-jest.mock('../repositories/posts/postsRepository');
+jest.mock('../../repositories/posts/postsRepository');
 
 describe('postsController', () => {
   let req: Partial<Request>;
   let res: Partial<Response>;
   let consoleErrorMock: jest.SpyInstance;
+
+  const mockRequestBody = {
+    title: 'Test Post',
+    content: 'This is a test post.',
+    userId: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
+    heroImageUrl:
+      'https://fastly.picsum.photos/id/584/800/600.jpg?hmac=a3J2cSrpIrYOJYrPB6m_drWlOrh0_0B10VIHEP0qFoY', // added by the middleware
+    jwtToken: 'valid_token', // added by the middleware
+  };
+
+  const mockPost: Post = {
+    id: '1',
+    title: 'Test Post',
+    content: 'This is a test post.',
+    created_at: new Date('2024-10-31'),
+    user_id: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
+    hero_image_url:
+      'https://fastly.picsum.photos/id/584/800/600.jpg?hmac=a3J2cSrpIrYOJYrPB6m_drWlOrh0_0B10VIHEP0qFoY',
+  };
 
   beforeAll(() => {
     consoleErrorMock = jest
@@ -31,7 +50,7 @@ describe('postsController', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
   });
 
   describe('getPosts', () => {
@@ -100,16 +119,7 @@ describe('postsController', () => {
   });
 
   describe('createPost', () => {
-    const mockPost: Post = {
-      id: '1',
-      title: 'Test Post',
-      content: 'This is a test post.',
-      created_at: new Date('2024-10-31'),
-      user_id: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
-      hero_image_url: `https://fastly.picsum.photos/id/584/800/600.jpg?hmac=a3J2cSrpIrYOJYrPB6m_drWlOrh0_0B10VIHEP0qFoY`,
-    };
-
-    it('should create a post with status 201 if validation and authorization pass', async () => {
+    it('should create a Post with status 201 if validation and authorization pass', async () => {
       req.body = { ...mockPost, jwtToken: 'valid_token' };
       (postsRepository.createPost as jest.Mock).mockResolvedValue(mockPost);
       jest.spyOn(postSchema, 'parse').mockReturnValue(mockPost);
@@ -121,11 +131,7 @@ describe('postsController', () => {
     });
 
     it('should return status 401 if token is missing', async () => {
-      req.body = {
-        title: 'Test Post',
-        content: 'This is a test post.',
-        userId: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
-      };
+      req.body = { ...mockRequestBody, jwtToken: undefined };
 
       await createPost(req as Request, res as Response);
 
@@ -134,12 +140,7 @@ describe('postsController', () => {
 
     it('should return status 500 if there is an error during creation', async () => {
       // body with data from the request + injected by middleware (userId and jwtToken)
-      req.body = {
-        title: 'Test Post',
-        content: 'This is a test post.',
-        userId: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
-        jwtToken: 'valid_token',
-      };
+      req.body = mockRequestBody;
 
       (postsRepository.createPost as jest.Mock).mockRejectedValue(
         new Error('Some error'),
@@ -163,6 +164,85 @@ describe('postsController', () => {
 
       expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
       expect(res.json).toHaveBeenCalledWith({ error: zodError.errors });
+    });
+  });
+
+  describe('updatePost', () => {
+    it('should update a Post with status 200 if valid data, token, and id query param are provided', async () => {
+      req.params = { id: '1' };
+      req.body = { ...mockRequestBody };
+      (postsRepository.updatePost as jest.Mock).mockResolvedValue(mockPost);
+
+      await updatePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
+      expect(res.json).toHaveBeenCalledWith(mockPost);
+    });
+
+    it('should return status 401 if token is missing', async () => {
+      req.params = { id: '1' };
+      req.body = { ...mockRequestBody, jwtToken: undefined };
+
+      await updatePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Token is missing' });
+    });
+
+    it('should return status 400 if post ID is missing', async () => {
+      req.params = { id: '' };
+      req.body = { ...mockRequestBody };
+
+      await updatePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'The Post id is missing',
+      });
+    });
+
+    it('should return status 404 if post is not found', async () => {
+      req.params = { id: '1' };
+      req.body = { ...mockRequestBody };
+      (postsRepository.updatePost as jest.Mock).mockResolvedValue(null);
+
+      await updatePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Post not found' });
+    });
+
+    it('should return status 400 if validation fails', async () => {
+      const zodError = new ZodError([{ message: 'Invalid data' } as ZodIssue]);
+      jest.spyOn(postSchema, 'parse').mockImplementation(() => {
+        throw zodError;
+      });
+      req.params = { id: '1' };
+      req.body = {};
+
+      await updatePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+      expect(res.json).toHaveBeenCalledWith({ error: zodError.errors });
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      req.params = { id: '1' };
+      req.body = { ...mockRequestBody };
+
+      (postsRepository.updatePost as jest.Mock).mockRejectedValue(
+        new Error('Internal error'),
+      );
+
+      await updatePost(req as Request, res as Response);
+
+      expect(consoleErrorMock).toHaveBeenCalledWith(
+        'Error updating post',
+        expect.any(Object),
+      );
+      expect(res.status).toHaveBeenCalledWith(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
     });
   });
 });
