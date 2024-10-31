@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { getCommentsByPostId, createComment } from './commentsController';
+import {
+  getCommentsByPostId,
+  createComment,
+  updateComment,
+} from './commentsController';
 import * as commentsRepository from '../../repositories/comments/commentsRepository';
 import { Comment, commentSchema } from '../../repositories/comments/types';
 import { ZodError, ZodIssue } from 'zod';
@@ -141,6 +145,95 @@ describe('commentsController', () => {
       );
 
       await createComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    });
+  });
+
+  describe('updateComment', () => {
+    it('should update a comment and return status 200 if validation and authorization pass', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { ...mockRequestBody };
+
+      (commentsRepository.updateComment as jest.Mock).mockResolvedValue(
+        mockComment,
+      );
+      jest.spyOn(commentSchema, 'parse').mockReturnValue(mockComment);
+
+      await updateComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
+      expect(res.json).toHaveBeenCalledWith(mockComment);
+    });
+
+    it('should return status 400 if post ID or comment ID is missing', async () => {
+      req.params = { id: '', commentId: '' }; // missing IDs
+      req.body = { content: mockComment.content, jwtToken: 'valid_token' };
+
+      await updateComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return status 401 if token is missing', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { content: mockComment.content, jwtToken: undefined };
+
+      await updateComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
+    });
+
+    it('should return status 400 if validation fails', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { ...mockRequestBody, userId: undefined }; // invalid content
+
+      const zodError = new ZodError([{ message: 'Invalid data' } as ZodIssue]);
+      jest.spyOn(commentSchema, 'parse').mockImplementation(() => {
+        throw zodError;
+      });
+
+      await updateComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+      expect(res.json).toHaveBeenCalledWith({ error: zodError.errors });
+    });
+
+    it('should return status 404 if the comment is not found', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { ...mockRequestBody };
+      (commentsRepository.updateComment as jest.Mock).mockResolvedValue(null);
+
+      await updateComment(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      req.params = {
+        id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
+        commentId: '1',
+      };
+      req.body = { ...mockRequestBody };
+      (commentsRepository.updateComment as jest.Mock).mockRejectedValue(
+        new Error('Internal error'),
+      );
+
+      await updateComment(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(
         StatusCodes.INTERNAL_SERVER_ERROR,

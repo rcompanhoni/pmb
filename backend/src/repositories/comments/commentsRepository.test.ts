@@ -1,5 +1,9 @@
 import { supabase } from '../../config/supabaseClient';
-import { getCommentsByPostId, createComment } from './commentsRepository';
+import {
+  getCommentsByPostId,
+  createComment,
+  updateComment,
+} from './commentsRepository';
 import { Comment } from './types';
 
 jest.mock('../../config/supabaseClient', () => ({
@@ -12,6 +16,8 @@ jest.mock('../../config/supabaseClient', () => ({
 
 describe('commentsRepository', () => {
   let consoleErrorMock: jest.SpyInstance;
+
+  const postId = '6a6c8b6c-6787-45b4-8332-ca5aa204ba9e';
   const mockComment: Comment = {
     id: '1',
     post_id: 'e1d148a0-b074-41c7-b61c-7c781c129042',
@@ -95,6 +101,50 @@ describe('commentsRepository', () => {
       });
 
       const result = await createComment(mockComment, 'valid_token');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('updateComment', () => {
+    it('should return the updated comment if no error occurs', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: mockComment, error: null }),
+      });
+
+      const result = await updateComment(postId, mockComment, 'valid_token');
+      expect(result).toEqual(mockComment);
+    });
+
+    it('should return null if there is an error during update', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Some error' },
+        }),
+      });
+
+      const result = await updateComment(postId, mockComment, 'valid_token');
+      expect(result).toBeNull();
+    });
+
+    it('should return null if no comment data is found after update', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        update: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      });
+
+      const result = await updateComment(postId, mockComment, 'valid_token');
       expect(result).toBeNull();
     });
   });

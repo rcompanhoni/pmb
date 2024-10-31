@@ -6,5 +6,6 @@ const router = Router({ mergeParams: true }); // includes posts/:id in the req.p
 
 router.post('/', authMiddleware, commentsController.createComment);
 router.get('/', commentsController.getCommentsByPostId);
+router.put('/:commentId', authMiddleware, commentsController.updateComment);
 
 export default router;

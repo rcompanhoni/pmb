@@ -76,3 +76,55 @@ export const createComment = async (
     });
   }
 };
+
+export const updateComment = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id: postId, commentId } = req.params;
+    if (!postId || !commentId) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: 'Post ID and Comment ID are required' });
+      return;
+    }
+
+    const token = req.body.jwtToken;
+    if (!token) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token is missing' });
+      return;
+    }
+
+    // validate the update data and transform it to the DB model format
+    const validatedData = commentSchema.parse({
+      ...req.body,
+      postId,
+      id: commentId,
+      userId: req.body.userId,
+    });
+
+    const updatedComment = await commentsRepository.updateComment(
+      commentId,
+      validatedData,
+      token,
+    );
+
+    if (updatedComment) {
+      res.status(StatusCodes.OK).json(updatedComment);
+    } else {
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Comment not found' });
+    }
+  } catch (error) {
+    console.error('Error updating comment', { error });
+
+    if (error instanceof ZodError) {
+      res.status(StatusCodes.BAD_REQUEST).json({ error: error.errors });
+      return;
+    }
+
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'An error occurred while updating the comment.',
+    });
+  }
+};

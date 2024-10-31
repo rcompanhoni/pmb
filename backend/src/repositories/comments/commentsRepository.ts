@@ -34,3 +34,25 @@ export const createComment = async (comment: Comment, token: string) => {
 
   return data;
 };
+
+export const updateComment = async (
+  commentId: string,
+  comment: Comment,
+  token: string,
+) => {
+  const { data, error } = await supabase
+    .from('comments')
+    .update(comment)
+    .eq('id', commentId)
+    .setHeader('Authorization', `Bearer ${token}`)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error(
+      `Error at commentsRepository.updateComment: ${error.message}`,
+    );
+  }
+
+  return data;
+};
