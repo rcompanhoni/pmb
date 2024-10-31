@@ -80,7 +80,7 @@ export const updatePost = async (
       return;
     }
 
-    // check for the ID query param
+    // check for the ID param
     const { id } = req.params;
     if (!id) {
       res
@@ -125,7 +125,7 @@ export const deletePost = async (
       return;
     }
 
-    // check for the ID query param
+    // check for the ID param
     const { id } = req.params;
     if (!id) {
       res

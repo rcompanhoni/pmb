@@ -1,20 +1,19 @@
 import { z } from 'zod';
 
 // transform maps the camelCase fields into snake_case which is used by the DB
-export const postSchema = z
+export const commentSchema = z
   .object({
     id: z.string().optional(),
     createdAt: z.date().optional(),
-    title: z.string().min(1, 'Title is required'),
-    content: z.string().optional(),
+    postId: z.string().uuid('Invalid post ID format'),
     userId: z.string().uuid('Invalid user ID format'),
-    heroImageUrl: z.string().optional(),
+    content: z.string().optional(),
   })
-  .transform(({ createdAt, userId, heroImageUrl, ...rest }) => ({
+  .transform(({ createdAt, postId, userId, ...rest }) => ({
     created_at: createdAt,
+    post_id: postId,
     user_id: userId,
-    hero_image_url: heroImageUrl,
     ...rest,
   }));
 
-export type Post = z.infer<typeof postSchema>;
+export type Comment = z.infer<typeof commentSchema>;
