@@ -39,7 +39,7 @@ export const createPost = async (
   res: Response,
 ): Promise<void> => {
   try {
-    // validate
+    // validate and transform the body data to the proper expected DB model
     const validatedData = postSchema.parse(req.body);
 
     // check for the JWT token
