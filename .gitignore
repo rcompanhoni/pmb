@@ -30,13 +30,6 @@ yarn-error.log*
 .idea/
 .DS_Store
 
-# Test and coverage
-coverage/
-*.spec.js
-*.spec.ts
-*.test.js
-*.test.ts
-
 # Ignore Yarn and NPM related files
 .yarn/
 .pnp.*
