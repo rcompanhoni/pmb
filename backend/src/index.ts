@@ -1,12 +1,18 @@
-import * as express from 'express';
-import { Request, Response } from 'express';
+import express from 'express';
+import { PORT } from './config/dotenv';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import mainRouter from './routes';
 
 const app = express();
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!');
+app.use(helmet());
+app.use(morgan('dev'));
+app.use(express.json());
+app.use('/api', mainRouter);
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
-app.listen(3000, () => {
-  console.log('Listening on port 3000');
-});
+export default app;
