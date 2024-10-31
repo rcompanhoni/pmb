@@ -1,5 +1,5 @@
 import { supabase } from '../../config/supabaseClient';
-import { getCommentsByPostId } from './commentsRepository';
+import { getCommentsByPostId, createComment } from './commentsRepository';
 import { Comment } from './types';
 
 jest.mock('../../config/supabaseClient', () => ({
@@ -67,6 +67,35 @@ describe('commentsRepository', () => {
 
       const result = await getCommentsByPostId('non-existent-post-id');
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('createComment', () => {
+    it('should return the created comment if insertion is successful', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        insert: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: mockComment, error: null }),
+      });
+
+      const result = await createComment(mockComment, 'valid_token');
+      expect(result).toEqual(mockComment);
+    });
+
+    it('should return null if insertion fails', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        insert: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Database error' },
+        }),
+      });
+
+      const result = await createComment(mockComment, 'valid_token');
+      expect(result).toBeNull();
     });
   });
 });

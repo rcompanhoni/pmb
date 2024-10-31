@@ -17,3 +17,20 @@ export const getCommentsByPostId = async (
 
   return data || [];
 };
+
+export const createComment = async (comment: Comment, token: string) => {
+  const { data, error } = await supabase
+    .from('comments')
+    .insert(comment)
+    .setHeader('Authorization', `Bearer ${token}`)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error(
+      `Error at commentsRepository.createComment: ${error.message}`,
+    );
+  }
+
+  return data;
+};

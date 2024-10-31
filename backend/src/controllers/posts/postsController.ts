@@ -10,6 +10,7 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
     res.status(StatusCodes.OK).json(posts);
   } catch (error) {
     console.error('Error fetching posts', { error });
+
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'An error occurred while retrieving posts.' });
@@ -28,6 +29,7 @@ export const getPost = async (req: Request, res: Response): Promise<void> => {
     }
   } catch (error) {
     console.error(`Error fetching post with ID ${req.params.id}`, { error });
+
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'An error occurred while retrieving the post.' });
@@ -53,12 +55,13 @@ export const createPost = async (
     const newPost = await postsRepository.createPost(validatedData, token);
     res.status(StatusCodes.CREATED).json(newPost);
   } catch (error) {
+    console.error('Error creating post', { error });
+
     if (error instanceof ZodError) {
       res.status(StatusCodes.BAD_REQUEST).json({ error: error.errors });
       return;
     }
 
-    console.error('Error creating post', { error });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       error: 'An error occurred while creating the post.',
     });
@@ -101,12 +104,13 @@ export const updatePost = async (
       res.status(StatusCodes.NOT_FOUND).json({ error: 'Post not found' });
     }
   } catch (error) {
+    console.error('Error updating post', { error });
+
     if (error instanceof ZodError) {
       res.status(StatusCodes.BAD_REQUEST).json({ error: error.errors });
       return;
     }
 
-    console.error('Error updating post', { error });
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       error: 'An error occurred while updating the post.',
     });
@@ -143,6 +147,7 @@ export const deletePost = async (
     }
   } catch (error) {
     console.error('Error deleting post', { error });
+
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       error: 'An error occurred while deleting the post.',
     });
