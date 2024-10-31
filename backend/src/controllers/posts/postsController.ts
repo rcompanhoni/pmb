@@ -112,3 +112,39 @@ export const updatePost = async (
     });
   }
 };
+
+export const deletePost = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    // check for the JWT token
+    const token = req.body.jwtToken;
+    if (!token) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token is missing' });
+      return;
+    }
+
+    // check for the ID query param
+    const { id } = req.params;
+    if (!id) {
+      res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: 'The Post id is missing' });
+      return;
+    }
+
+    // persist
+    const deletedPost = await postsRepository.deletePost(id, token);
+    if (deletedPost) {
+      res.status(StatusCodes.OK).json({ message: 'Post deleted successfully' });
+    } else {
+      res.status(StatusCodes.NOT_FOUND).json({ error: 'Post not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting post', { error });
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: 'An error occurred while deleting the post.',
+    });
+  }
+};

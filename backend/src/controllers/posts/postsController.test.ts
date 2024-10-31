@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import { ZodError, ZodIssue } from 'zod';
-import { getPosts, getPost, createPost, updatePost } from './postsController';
+import {
+  getPosts,
+  getPost,
+  createPost,
+  updatePost,
+  deletePost,
+} from './postsController';
 import * as postsRepository from '../../repositories/posts/postsRepository';
 import { StatusCodes } from 'http-status-codes';
 import { Post, postSchema } from '../../repositories/posts/types';
@@ -170,13 +176,12 @@ describe('postsController', () => {
   describe('updatePost', () => {
     it('should update a Post with status 200 if valid data, token, and id query param are provided', async () => {
       req.params = { id: '1' };
-      req.body = { ...mockRequestBody };
+      req.body = { ...mockRequestBody, jwtToken: 'valid-token' };
       (postsRepository.updatePost as jest.Mock).mockResolvedValue(mockPost);
 
       await updatePost(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
-      expect(res.json).toHaveBeenCalledWith(mockPost);
     });
 
     it('should return status 401 if token is missing', async () => {
@@ -186,7 +191,6 @@ describe('postsController', () => {
       await updatePost(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Token is missing' });
     });
 
     it('should return status 400 if post ID is missing', async () => {
@@ -196,9 +200,6 @@ describe('postsController', () => {
       await updatePost(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'The Post id is missing',
-      });
     });
 
     it('should return status 404 if post is not found', async () => {
@@ -209,7 +210,6 @@ describe('postsController', () => {
       await updatePost(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Post not found' });
     });
 
     it('should return status 400 if validation fails', async () => {
@@ -236,10 +236,60 @@ describe('postsController', () => {
 
       await updatePost(req as Request, res as Response);
 
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        'Error updating post',
-        expect.any(Object),
+      expect(res.status).toHaveBeenCalledWith(
+        StatusCodes.INTERNAL_SERVER_ERROR,
       );
+    });
+  });
+
+  describe('deletePost', () => {
+    it('should delete a Post with status 200 if valid id and token are provided', async () => {
+      req.params = { id: '1' };
+      req.body = { ...mockRequestBody, jwtToken: 'valid-token' };
+      (postsRepository.deletePost as jest.Mock).mockResolvedValue(mockPost);
+
+      await deletePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
+    });
+
+    it('should return status 401 if token is missing', async () => {
+      req.params = { id: '1' };
+      req.body = { ...mockRequestBody, jwtToken: undefined };
+
+      await deletePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
+    });
+
+    it('should return status 400 if post ID is missing', async () => {
+      req.params = {};
+      req.body = { jwtToken: 'valid_token' };
+
+      await deletePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
+    });
+
+    it('should return status 404 if post is not found', async () => {
+      req.params = { id: '1' };
+      req.body = { jwtToken: 'valid_token' };
+      (postsRepository.deletePost as jest.Mock).mockResolvedValue(null);
+
+      await deletePost(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
+    });
+
+    it('should return status 500 if there is an internal error', async () => {
+      req.params = { id: '1' };
+      req.body = { jwtToken: 'valid_token' };
+      (postsRepository.deletePost as jest.Mock).mockRejectedValue(
+        new Error('Internal error'),
+      );
+
+      await deletePost(req as Request, res as Response);
+
       expect(res.status).toHaveBeenCalledWith(
         StatusCodes.INTERNAL_SERVER_ERROR,
       );

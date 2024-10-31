@@ -4,6 +4,7 @@ import {
   getPostById,
   createPost,
   updatePost,
+  deletePost,
 } from './postsRepository';
 import { Post } from './types';
 
@@ -148,6 +149,37 @@ describe('postsRepository', () => {
       });
 
       const result = await updatePost('1', mockPost, 'valid_token');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('deletePost', () => {
+    it('should return the deleted Post data if no error occurs', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        delete: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({ data: mockPost, error: null }),
+      });
+
+      const result = await deletePost('1', 'valid_token');
+      expect(result).toEqual(mockPost);
+    });
+
+    it('should return null and log an error if an error occurs during post deletion', async () => {
+      (supabase.from as jest.Mock).mockReturnValue({
+        delete: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Some error' },
+        }),
+      });
+
+      const result = await deletePost('1', 'valid_token');
       expect(result).toBeNull();
     });
   });

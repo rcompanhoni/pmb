@@ -53,3 +53,19 @@ export const updatePost = async (id: string, post: Post, token: string) => {
 
   return data;
 };
+
+export const deletePost = async (id: string, token: string) => {
+  const { data, error } = await supabase
+    .from('posts')
+    .delete()
+    .eq('id', id)
+    .setHeader('Authorization', `Bearer ${token}`)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error(`Error at postsRepository.deletePost: ${error.message}`);
+  }
+
+  return data;
+};
