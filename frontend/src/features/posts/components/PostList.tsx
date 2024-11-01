@@ -3,10 +3,10 @@ import { usePosts } from "../hooks/usePosts";
 import { Post } from "../models/Post";
 
 export default function PostList() {
-  const { data: posts, isLoading, error } = usePosts();
+  const { data: posts, isLoading, isError } = usePosts();
 
   if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Error loading posts.</p>;
+  if (isError) return <p>Error loading posts.</p>;
 
   return (
     <div className="space-y-4">
