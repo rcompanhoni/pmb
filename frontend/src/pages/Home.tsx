@@ -1,6 +1,6 @@
 import Layout from "../layout/Layout";
-import PostList from "../features/posts/PostList";
-import RecentPosts from "../features/posts/RecentPosts";
+import PostList from "../features/posts/components/PostList";
+import RecentPosts from "../features/posts/components/RecentPosts";
 
 export default function Home() {
   return (
