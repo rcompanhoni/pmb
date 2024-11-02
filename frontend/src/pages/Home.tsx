@@ -1,6 +1,6 @@
 import Layout from "../components/Layout";
 import PostList from "../features/posts/components/PostList";
-import RecentPosts from "../features/posts/components/RecentPosts";
+import Instructions from "../features/posts/components/Instructions";
 
 export default function Home() {
   return (
@@ -11,7 +11,7 @@ export default function Home() {
         </div>
 
         <div className="hidden md:block md:w-3/12">
-          <RecentPosts />
+          <Instructions />
         </div>
       </div>
     </Layout>

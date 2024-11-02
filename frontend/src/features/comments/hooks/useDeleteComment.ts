@@ -16,7 +16,6 @@ const deleteComment = async ({
   commentId,
   token,
 }: DeleteCommentParams) => {
-  debugger;
   await apiClient.delete(`/posts/${postId}/comments/${commentId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
