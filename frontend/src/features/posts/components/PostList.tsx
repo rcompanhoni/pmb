@@ -3,16 +3,22 @@ import { usePosts } from "../hooks/usePosts";
 import { Post } from "../models/Post";
 import PostPreview from "./PostPreview";
 import PaginationControls from "../../../components/PaginationControls";
+import { usePrefetchNextPostsPage } from "../hooks/usePrefetchNextPostsPage";
 
 export default function PostList() {
   const [page, setPage] = useState(1);
   const pageSize = 4;
-  const { data, isLoading, isError } = usePosts(page, pageSize);
 
+  // fetch the current page data
+  const { data, isLoading, isError } = usePosts(page, pageSize);
+  const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
+
+  // prefetch the next page
+  usePrefetchNextPostsPage(page, pageSize, totalPages);
+
+  // handle loading and error states
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error loading posts.</p>;
-
-  const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
 
   return (
     <div className="space-y-4">

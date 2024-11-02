@@ -13,7 +13,7 @@ export default function PaginationControls({
     <div className="pagination-controls mt-4 flex justify-center items-center space-x-4">
       <button
         onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        disabled={currentPage <= 1}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
       >
         Previous
@@ -23,7 +23,7 @@ export default function PaginationControls({
       </span>
       <button
         onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        disabled={currentPage >= totalPages}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300"
       >
         Next

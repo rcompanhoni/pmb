@@ -12,5 +12,7 @@ export const usePosts = (page = 1, pageSize = 10) => {
   return useQuery({
     queryKey: ["posts", page, pageSize],
     queryFn: () => fetchPosts(page, pageSize),
+    staleTime: 1000 * 60 * 5, // data fresh for 5 minutes
+    gcTime: 1000 * 60 * 30, // garbage collected if unused for 30 minutes
   });
 };
