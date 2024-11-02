@@ -5,21 +5,27 @@ import { fetchPosts } from "./usePosts";
 export const usePrefetchNextPostsPage = (
   page: number,
   pageSize: number,
-  totalPages: number
+  totalPages: number,
+  search?: string
 ) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const nextPage = page + 1;
+    if (search) return; // skip prefetching if there's a search term
 
-    // prefetch only if there is a next page
+    const nextPage = page + 1;
     if (nextPage <= totalPages) {
-      queryClient.prefetchQuery({
-        queryKey: ["posts", nextPage, pageSize],
-        queryFn: () => fetchPosts(nextPage, pageSize),
-        staleTime: 1000 * 60 * 5, // data fresh for 5 minutes
-        gcTime: 1000 * 60 * 30, // garbage collected if unused for 30 minutes
-      });
+      const queryKey = ["posts", nextPage, pageSize];
+      const isCached = queryClient.getQueryData(queryKey);
+
+      if (!isCached) {
+        queryClient.prefetchQuery({
+          queryKey,
+          queryFn: () => fetchPosts(nextPage, pageSize),
+          staleTime: 1000 * 60 * 5,
+          gcTime: 1000 * 60 * 30,
+        });
+      }
     }
-  }, [page, pageSize, totalPages, queryClient]);
+  }, [page, pageSize, totalPages, search, queryClient]);
 };

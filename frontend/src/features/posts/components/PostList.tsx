@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { usePosts } from "../hooks/usePosts";
 import { Post } from "../models/Post";
@@ -13,18 +13,24 @@ export default function PostList() {
   const [page, setPage] = useState(1);
   const pageSize = 4;
 
-  // fetch the current page data
-  const { data, isLoading, isError } = usePosts(page, pageSize);
+  // get URL query param and reset the page when it changes
+  const query = new URLSearchParams(useLocation().search);
+  const search = query.get("search") || undefined;
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
+  // fetch the current page data with the search term
+  const { data, isLoading, isError } = usePosts(page, pageSize, search);
   const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
 
-  // prefetch the next page
-  usePrefetchNextPostsPage(page, pageSize, totalPages);
+  // prefetch next page from the main Post list for optimization
+  usePrefetchNextPostsPage(page, pageSize, totalPages, search);
 
   const handleCreatePost = () => {
     navigate("/post-editor");
   };
 
-  // handle loading and error states
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error loading posts.</p>;
 
