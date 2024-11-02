@@ -7,7 +7,8 @@ export const getCommentsByPostId = async (
   const { data, error } = await supabase
     .from('comments')
     .select('*')
-    .eq('post_id', postId);
+    .eq('post_id', postId)
+    .order('created_at', { ascending: false });
 
   if (error) {
     console.error(

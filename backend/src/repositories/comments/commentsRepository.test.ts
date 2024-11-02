@@ -49,7 +49,10 @@ describe('commentsRepository', () => {
     it('should return an array of Comment if no error occurs', async () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ data: [mockComment], error: null }),
+        eq: jest.fn().mockReturnThis(),
+        order: jest
+          .fn()
+          .mockResolvedValue({ data: [mockComment], error: null }),
       });
 
       const result = await getCommentsByPostId(mockComment.post_id);
@@ -59,7 +62,8 @@ describe('commentsRepository', () => {
     it('should return an empty array if an error occurs', async () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue({
           data: null,
           error: { message: 'Some error' },
         }),
@@ -72,7 +76,8 @@ describe('commentsRepository', () => {
     it('should return an empty array if there are no comments for the post', async () => {
       (supabase.from as jest.Mock).mockReturnValue({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockResolvedValue({ data: [], error: null }),
+        eq: jest.fn().mockReturnThis(),
+        order: jest.fn().mockResolvedValue({ data: [], error: null }),
       });
 
       const result = await getCommentsByPostId('non-existent-post-id');
