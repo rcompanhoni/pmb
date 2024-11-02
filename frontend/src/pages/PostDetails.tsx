@@ -1,6 +1,7 @@
-import Layout from "../layout/Layout";
+import { useParams } from "react-router-dom";
 import { format } from "date-fns";
-import CommentList from "../features/comments/CommentList";
+import Layout from "../layout/Layout";
+import CommentList from "../features/comments/components/CommentList";
 
 interface Post {
   id: string;
@@ -24,7 +25,12 @@ const mockPost: Post = {
 };
 
 export default function PostDetail() {
-  const post = mockPost; // Use mock data
+  const { postId } = useParams<{ postId: string }>();
+  if (!postId) {
+    return <div>TODO</div>;
+  }
+
+  const post = mockPost; // Use mock data for demonstration
 
   return (
     <Layout>
@@ -46,8 +52,7 @@ export default function PostDetail() {
           <p>{post.content}</p>
         </div>
 
-        {/* Add the CommentList component below the post content */}
-        <CommentList />
+        <CommentList postId={postId} />
       </div>
     </Layout>
   );
