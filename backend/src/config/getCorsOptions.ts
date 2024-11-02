@@ -1,8 +1,10 @@
 import { CorsOptions } from 'cors';
+import { NODE_ENV } from './dotenv';
 
 const allowedOrigins = [
-  'http://localhost:5173',
-  'https://frontend-production-c823.up.railway.app',
+  NODE_ENV === 'development'
+    ? 'http://localhost:5173'
+    : 'https://frontend-production-c823.up.railway.app',
 ];
 
 export const getCorsOptions = (): CorsOptions => ({
