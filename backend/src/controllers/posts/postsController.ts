@@ -8,16 +8,17 @@ export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
     const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
     const page = parseInt(req.query.page as string, 10) || 1;
+    const search = req.query.search ? String(req.query.search) : '';
 
     const { posts, totalCount } = await postsRepository.getAllPosts(
       pageSize,
       page,
+      search,
     );
 
     res.status(StatusCodes.OK).json({ posts, totalCount, page, pageSize });
   } catch (error) {
     console.error('Error fetching posts', { error });
-
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ error: 'An error occurred while retrieving posts.' });

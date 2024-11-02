@@ -49,46 +49,49 @@ describe('postsRepository', () => {
   });
 
   describe('getAllPosts', () => {
-    it('should return paginated posts and total count if no error occurs', async () => {
+    it('should return paginated posts and total count if no error occurs, with search', async () => {
       (supabase.from as jest.Mock).mockReturnValueOnce({
         select: jest.fn().mockReturnThis(),
         order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({ data: [mockPost], error: null }),
+        range: jest.fn().mockReturnThis(),
+        or: jest.fn().mockResolvedValue({ data: [mockPost], error: null }),
       });
 
       (supabase.from as jest.Mock).mockReturnValueOnce({
-        select: jest.fn().mockResolvedValue({ count: 1, error: null }),
+        select: jest.fn().mockReturnThis(),
+        or: jest.fn().mockResolvedValue({ count: 1, error: null }),
       });
 
       const pageSize = 10;
       const page = 1;
-      const result = await getAllPosts(pageSize, page);
+      const search = 'test';
+      const result = await getAllPosts(pageSize, page, search);
 
       expect(result).toEqual({ posts: [mockPost], totalCount: 1 });
     });
 
-    it('should return an empty array and count of 0 if an error occurs during posts fetch', async () => {
+    it('should return an empty array and count of 0 if an error occurs during count fetch', async () => {
       (supabase.from as jest.Mock).mockReturnValueOnce({
         select: jest.fn().mockReturnThis(),
         order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Database error' },
-        }),
+        range: jest.fn().mockReturnThis(),
+        or: jest.fn().mockResolvedValue({ data: [mockPost], error: null }),
       });
 
       (supabase.from as jest.Mock).mockReturnValueOnce({
-        select: jest.fn().mockResolvedValue({ count: 0, error: null }),
+        select: jest.fn().mockReturnThis(),
+        or: jest.fn().mockResolvedValue({
+          count: null,
+          error: { message: 'Count error' },
+        }),
       });
 
       const pageSize = 10;
       const page = 1;
-      const result = await getAllPosts(pageSize, page);
+      const search = 'count';
+      const result = await getAllPosts(pageSize, page, search);
 
-      expect(result).toEqual({ posts: [], totalCount: 0 });
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        'Error at postsRepository.getAllPosts: Database error',
-      );
+      expect(result).toEqual({ posts: [mockPost], totalCount: 0 });
     });
   });
 

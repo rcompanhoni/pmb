@@ -4,23 +4,36 @@ import { Post } from './types';
 export const getAllPosts = async (
   pageSize: number,
   page: number,
+  search: string,
 ): Promise<{ posts: Post[]; totalCount: number }> => {
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // query for posts with pagination
-  const postsQuery = supabase
+  let postsQuery = supabase
     .from('posts')
     .select('*')
     .order('created_at', { ascending: false })
     .range(from, to);
 
+  // Apply search filter if search query is provided
+  if (search) {
+    postsQuery = postsQuery.or(
+      `title.ilike.%${search}%,content.ilike.%${search}%`,
+    );
+  }
+
   const { data: posts, error: postsError } = await postsQuery;
 
-  // query for total count
-  const countQuery = supabase
+  // Query for total count without pagination
+  let countQuery = supabase
     .from('posts')
     .select('*', { count: 'exact', head: true });
+
+  if (search) {
+    countQuery = countQuery.or(
+      `title.ilike.%${search}%,content.ilike.%${search}%`,
+    );
+  }
 
   const { count: totalCount, error: countError } = await countQuery;
 
