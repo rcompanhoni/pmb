@@ -1,9 +1,17 @@
 import { supabase } from '../../config/supabaseClient';
 import { Post } from './types';
 
-export const getAllPosts = async (): Promise<Post[]> => {
-  const { data, error } = await supabase.from('posts').select('*');
+export const getAllPosts = async (pageSize?: number): Promise<Post[]> => {
+  const query = supabase
+    .from('posts')
+    .select('*')
+    .order('created_at', { ascending: false }); // orders by most recent
 
+  if (pageSize) {
+    query.limit(pageSize);
+  }
+
+  const { data, error } = await query;
   if (error) {
     console.error(`Error at postsRepository.getAllPosts: ${error.message}`);
   }
