@@ -1,4 +1,4 @@
-import Layout from "../layout/Layout";
+import Layout from "../components/Layout";
 import PostList from "../features/posts/components/PostList";
 import RecentPosts from "../features/posts/components/RecentPosts";
 

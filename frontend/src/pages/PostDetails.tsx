@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import Layout from "../layout/Layout";
+import Layout from "../components/Layout";
 import CommentList from "../features/comments/components/CommentList";
 import { usePost } from "../features/posts/hooks/usePost";
 import PostItem from "../features/posts/components/PostItem";
