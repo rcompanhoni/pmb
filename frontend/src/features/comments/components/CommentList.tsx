@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useComments } from "../hooks/useComments";
 import { Comment } from "../models/Comment";
-import CommentItem from "./Comment";
-import CommentModal from "./CommentModal"; // Import the new modal component
+import CommentItem from "./CommentItem";
+import CommentModal from "./CommentModal";
 import { useAuth } from "../../../context/AuthContext";
 
 interface CommentListProps {
@@ -21,6 +21,7 @@ export default function CommentList({ postId }: CommentListProps) {
     <div className="mt-8">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold mb-4">Comments</h2>
+
         {user && (
           <button
             onClick={openModal}
@@ -38,7 +39,7 @@ export default function CommentList({ postId }: CommentListProps) {
 
         {comments && comments.length > 0
           ? comments.map((comment: Comment) => (
-              <CommentItem comment={comment} key={comment.id} />
+              <CommentItem comment={comment} key={comment.id} postId={postId} />
             ))
           : !isLoading && !isError && <p>No comments available.</p>}
       </div>
@@ -47,7 +48,7 @@ export default function CommentList({ postId }: CommentListProps) {
         isOpen={isModalOpen}
         onRequestClose={closeModal}
         postId={postId}
-        onSuccess={() => closeModal()}
+        onSuccess={closeModal}
       />
     </div>
   );

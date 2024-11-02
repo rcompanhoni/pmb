@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { z } from "zod";
 import { useCreateComment } from "../hooks/useCreateComment";
+import { useUpdateComment } from "../hooks/useUpdateComment";
 import { useAuth } from "../../../context/AuthContext";
 
 const commentSchema = z.object({
@@ -12,6 +13,7 @@ interface CommentModalProps {
   isOpen: boolean;
   onRequestClose: () => void;
   postId: string;
+  commentId?: string;
   initialData?: { content: string };
   onSuccess: () => void;
 }
@@ -20,11 +22,13 @@ export default function CommentModal({
   isOpen,
   onRequestClose,
   postId,
+  commentId,
   initialData,
   onSuccess,
 }: CommentModalProps) {
   const { token, user } = useAuth();
   const { mutate: createComment } = useCreateComment();
+  const { mutate: updateComment } = useUpdateComment();
   const [formData, setFormData] = useState({
     content: initialData?.content || "",
   });
@@ -46,22 +50,43 @@ export default function CommentModal({
 
     const result = commentSchema.safeParse(formData);
     if (result.success) {
-      setErrors({}); // clear errors if validation is successful
-      createComment(
-        {
-          postId,
-          content: formData.content,
-          token: token || "",
-          email: user?.email || "",
-        },
-        {
-          onSuccess: () => {
-            onRequestClose(); // close the modal after successful creation
-            setFormData({ content: "" }); // reset the form
-            onSuccess(); // create or update
+      setErrors({});
+      if (initialData && commentId) {
+        // update comment if initialData is provided
+        updateComment(
+          {
+            postId,
+            commentId,
+            content: formData.content,
+            token: token || "",
+            email: user?.email || "",
           },
-        }
-      );
+          {
+            onSuccess: () => {
+              onRequestClose();
+              setFormData({ content: "" });
+              onSuccess();
+            },
+          }
+        );
+      } else {
+        // create comment instead
+        createComment(
+          {
+            postId,
+            content: formData.content,
+            token: token || "",
+            email: user?.email || "",
+          },
+          {
+            onSuccess: () => {
+              onRequestClose();
+              setFormData({ content: "" });
+              onSuccess();
+            },
+          }
+        );
+      }
     } else {
       const validationErrors: { content?: string } = {};
       result.error.errors.forEach((error) => {
@@ -82,6 +107,7 @@ export default function CommentModal({
       <h2 className="text-xl font-bold mb-4">
         {initialData ? "Edit Comment" : "Create New Comment"}
       </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-gray-700">Comment Content</label>
@@ -96,6 +122,7 @@ export default function CommentModal({
             <p className="text-red-500 text-sm">{errors.content}</p>
           )}
         </div>
+
         <div className="flex justify-end space-x-2">
           <button
             type="button"
@@ -104,6 +131,7 @@ export default function CommentModal({
           >
             Cancel
           </button>
+
           <button
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded"

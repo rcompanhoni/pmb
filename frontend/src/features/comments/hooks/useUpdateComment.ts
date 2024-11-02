@@ -5,21 +5,23 @@ import {
 } from "@tanstack/react-query";
 import apiClient from "../../../utils/api";
 
-interface CreateCommentParams {
+interface UpdateCommentParams {
   postId: string;
+  commentId: string;
   content: string;
   token: string;
   email: string;
 }
 
-const createComment = async ({
+const updateComment = async ({
   postId,
+  commentId,
   content,
   token,
   email,
-}: CreateCommentParams) => {
-  await apiClient.post(
-    `/posts/${postId}/comments`,
+}: UpdateCommentParams) => {
+  await apiClient.put(
+    `/posts/${postId}/comments/${commentId}`,
     { content, email },
     {
       headers: {
@@ -29,17 +31,17 @@ const createComment = async ({
   );
 };
 
-export const useCreateComment = (): UseMutationResult<
+export const useUpdateComment = (): UseMutationResult<
   void, // mutation returns no data
   Error, // type of Error thrown by the mutation
-  CreateCommentParams // parameter types
+  UpdateCommentParams // parameter types
 > => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createComment,
+    mutationFn: updateComment,
     onError: (error: Error) => {
-      console.error("Error creating comment:", error);
+      console.error("Error updating comment:", error);
     },
     onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
