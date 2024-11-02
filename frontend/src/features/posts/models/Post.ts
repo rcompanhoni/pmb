@@ -5,4 +5,5 @@ export interface Post {
   content: string;
   user_id: string;
   hero_image_url: string;
+  email: string;
 }

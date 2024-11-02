@@ -18,7 +18,7 @@ export default function PostItem({ post }: PostItemProps) {
         <div className="absolute bottom-4 left-6 bg-opacity-60 bg-black text-white p-4 rounded-md">
           <h1 className="text-4xl font-semibold">{post.title}</h1>
           <p className="text-gray-300">
-            By {post.user_id} on{" "}
+            By <span className="font-bold">{post.email}</span> on{" "}
             {format(new Date(post.created_at), "MMM do, yyyy")}
           </p>
         </div>

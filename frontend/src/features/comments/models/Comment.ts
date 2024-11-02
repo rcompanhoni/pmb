@@ -4,4 +4,5 @@ export interface Comment {
   post_id: string;
   user_id: string;
   content: string;
+  email: string;
 }
