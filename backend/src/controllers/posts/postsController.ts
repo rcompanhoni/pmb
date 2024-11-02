@@ -6,8 +6,15 @@ import { postSchema } from '../../repositories/posts/types';
 
 export const getPosts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const posts = await postsRepository.getAllPosts();
-    res.status(StatusCodes.OK).json(posts);
+    const pageSize = parseInt(req.query.pageSize as string, 10) || 10;
+    const page = parseInt(req.query.page as string, 10) || 1;
+
+    const { posts, totalCount } = await postsRepository.getAllPosts(
+      pageSize,
+      page,
+    );
+
+    res.status(StatusCodes.OK).json({ posts, totalCount, page, pageSize });
   } catch (error) {
     console.error('Error fetching posts', { error });
 

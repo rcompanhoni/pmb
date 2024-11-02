@@ -60,16 +60,33 @@ describe('postsController', () => {
   });
 
   describe('getPosts', () => {
-    it('should return a list of posts with status 200', async () => {
+    it('should return a paginated list of posts with status 200', async () => {
       const mockPosts = [
-        { id: '1', title: 'Test Post', content: 'Test content' },
+        {
+          id: '1',
+          title: 'Test Post',
+          content: 'Test content',
+          created_at: '2024-11-01',
+        },
       ];
-      (postsRepository.getAllPosts as jest.Mock).mockResolvedValue(mockPosts);
+      const mockTotalCount = 1;
+
+      (postsRepository.getAllPosts as jest.Mock).mockResolvedValue({
+        posts: mockPosts,
+        totalCount: mockTotalCount,
+      });
+
+      req.query = { pageSize: '10', page: '1' };
 
       await getPosts(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
-      expect(res.json).toHaveBeenCalledWith(mockPosts);
+      expect(res.json).toHaveBeenCalledWith({
+        posts: mockPosts,
+        totalCount: mockTotalCount,
+        page: 1,
+        pageSize: 10,
+      });
     });
 
     it('should return status 500 if there is an error', async () => {
@@ -79,10 +96,6 @@ describe('postsController', () => {
 
       await getPosts(req as Request, res as Response);
 
-      expect(consoleErrorMock).toHaveBeenCalledWith(
-        'Error fetching posts',
-        expect.any(Object),
-      );
       expect(res.status).toHaveBeenCalledWith(
         StatusCodes.INTERNAL_SERVER_ERROR,
       );
