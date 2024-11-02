@@ -8,6 +8,7 @@ export const commentSchema = z
     postId: z.string().uuid('Invalid post ID format'),
     userId: z.string().uuid('Invalid user ID format'),
     content: z.string().optional(),
+    email: z.string().optional(),
   })
   .transform(({ createdAt, postId, userId, ...rest }) => ({
     created_at: createdAt,

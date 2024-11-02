@@ -29,6 +29,7 @@ describe('commentsController', () => {
     user_id: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
     content: 'This is a comment.',
     created_at: new Date('2024-10-31'),
+    email: 'test@test.com',
   };
 
   beforeAll(() => {

@@ -23,7 +23,8 @@ describe('postsController', () => {
     content: 'This is a test post.',
     userId: '9bc47e64-8830-416b-9b15-0ad1458cf1ff',
     heroImageUrl:
-      'https://fastly.picsum.photos/id/584/800/600.jpg?hmac=a3J2cSrpIrYOJYrPB6m_drWlOrh0_0B10VIHEP0qFoY', // added by the middleware
+      'https://fastly.picsum.photos/id/584/800/600.jpg?hmac=a3J2cSrpIrYOJYrPB6m_drWlOrh0_0B10VIHEP0qFoY',
+    email: 'test@test.com',
     jwtToken: 'valid_token', // added by the middleware
   };
 

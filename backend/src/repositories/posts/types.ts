@@ -9,6 +9,7 @@ export const postSchema = z
     content: z.string().optional(),
     userId: z.string().uuid('Invalid user ID format'),
     heroImageUrl: z.string().optional(),
+    email: z.string().optional(),
   })
   .transform(({ createdAt, userId, heroImageUrl, ...rest }) => ({
     created_at: createdAt,
