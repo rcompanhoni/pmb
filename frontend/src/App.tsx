@@ -9,7 +9,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/posts/:postId" element={<PostDetails />} />
-        <Route path="/post-editor" element={<PostEditor />} />
+        <Route path="/post-editor/:postId?" element={<PostEditor />} />
       </Routes>
     </Router>
   );

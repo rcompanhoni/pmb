@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PostFormData, postSchema } from "../models/PostFormData";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -15,6 +15,12 @@ export default function PostForm({ onSubmit, initialData }: PostFormProps) {
   const [errors, setErrors] = useState<{
     [key in keyof PostFormData]?: string;
   }>({});
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -33,7 +39,6 @@ export default function PostForm({ onSubmit, initialData }: PostFormProps) {
     const result = postSchema.safeParse(formData);
 
     if (result.success) {
-      debugger;
       setErrors({});
       onSubmit({ ...formData, email: user?.email });
     } else {
