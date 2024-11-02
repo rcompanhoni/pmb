@@ -1,35 +1,30 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { usePosts } from "../hooks/usePosts";
 import { Post } from "../models/Post";
+import PostPreview from "./PostPreview";
+import PaginationControls from "../../../components/PaginationControls";
 
 export default function PostList() {
-  const { data: posts, isLoading, isError } = usePosts();
+  const [page, setPage] = useState(1);
+  const pageSize = 4;
+  const { data, isLoading, isError } = usePosts(page, pageSize);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error loading posts.</p>;
 
+  const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
+
   return (
     <div className="space-y-4">
-      {posts.map((post: Post) => (
-        <div
-          key={post.id}
-          className="p-4 border rounded-md shadow-sm hover:shadow-lg"
-        >
-          <img
-            src={post.hero_image_url}
-            alt={post.title}
-            className="w-full h-48 md:h-80 object-cover rounded-md mb-4"
-          />
-          <h2 className="text-2xl font-semibold">{post.title}</h2>
-          <p className="text-gray-600">{post.content.slice(0, 100)}...</p>
-          <Link
-            to={`/posts/${post.id}`}
-            className="text-blue-500 hover:underline mt-2 inline-block"
-          >
-            Read more
-          </Link>
-        </div>
+      {data?.posts.map((post: Post) => (
+        <PostPreview key={post.id} post={post} />
       ))}
+
+      <PaginationControls
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
   );
 }
