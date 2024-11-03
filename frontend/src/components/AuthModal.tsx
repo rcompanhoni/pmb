@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import Modal from "react-modal";
 import { Auth } from "@supabase/auth-ui-react";
-import { supabaseClient } from "../../../utils/supabaseClient";
+import { supabaseClient } from "../utils/supabaseClient";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,7 +30,17 @@ export default function AuthModal({ isOpen, onRequestClose }: AuthModalProps) {
       <div className="flex flex-col items-center space-y-4">
         <Auth
           supabaseClient={supabaseClient}
-          appearance={{ theme: ThemeSupa }}
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: "blue",
+                  brandAccent: "darkblue",
+                },
+              },
+            },
+          }}
           providers={[]}
           redirectTo={window.location.origin}
           onlyThirdPartyProviders={false}

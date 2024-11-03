@@ -4,13 +4,13 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import apiClient from "../../../utils/api";
-import { PostFormData } from "../models/PostFormData";
+import { PostFormData } from "../types";
 
 const editPost = async ({
   postId,
   token,
   ...data
-}: PostFormData & { postId: string; token: string }): Promise<void> => {
+}: PostFormData): Promise<void> => {
   await apiClient.put(`/posts/${postId}`, data, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -21,7 +21,7 @@ const editPost = async ({
 export const useUpdatePost = (): UseMutationResult<
   void, // mutation returns no data
   Error, // type of Error thrown by the mutation
-  PostFormData & { postId: string; token: string } // parameter types
+  PostFormData // parameter types
 > => {
   const queryClient = useQueryClient();
 

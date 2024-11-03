@@ -1,8 +1,8 @@
-import { format } from "date-fns";
 import { useState } from "react";
+import { format } from "date-fns";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
-import { Comment } from "../models/Comment";
+import { Comment } from "../types";
 import CommentModal from "./CommentModal";
 import { useDeleteComment } from "../hooks/useDeleteComment";
 
@@ -49,6 +49,7 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
             >
               <FaEdit className="w-5 h-5" />
             </button>
+
             <button
               onClick={handleDeleteClick}
               className="text-red-500 hover:text-red-700 p-1"
@@ -62,6 +63,7 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
       <div className="text-sm text-gray-500">
         {format(new Date(comment.created_at), "MMM d, yyyy")}
       </div>
+
       <p className="text-gray-700 mt-1">{comment.content}</p>
 
       {isEditing && (

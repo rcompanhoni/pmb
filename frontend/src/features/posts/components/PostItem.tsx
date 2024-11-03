@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Post } from "../models/Post";
+import { Post } from "../types";
 
 interface PostItemProps {
   post: Post;

@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { usePosts } from "../hooks/usePosts";
-import { Post } from "../models/Post";
+import { Post } from "../types";
 import PostPreview from "./PostPreview";
 import PaginationControls from "../../../components/PaginationControls";
 import { usePrefetchNextPostsPage } from "../hooks/usePrefetchNextPostsPage";
+import NoListItems from "../../../components/EmptyState";
 
 export default function PostList() {
   const { user } = useAuth();
@@ -22,17 +23,19 @@ export default function PostList() {
 
   // fetch the current page data with the search term
   const { data, isLoading, isError } = usePosts(page, pageSize, search);
-  const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
 
   // prefetch next page from the main Post list for optimization
+  const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
   usePrefetchNextPostsPage(page, pageSize, totalPages, search);
+
+  // handlle no items, loading and error states
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error loading posts.</p>;
+  if (!data?.posts.length) return <NoListItems message="No posts available." />;
 
   const handleCreatePost = () => {
     navigate("/post-editor");
   };
-
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error loading posts.</p>;
 
   return (
     <div className="space-y-4">

@@ -6,3 +6,11 @@ export interface Comment {
   content: string;
   email: string;
 }
+
+export interface CommentFormData {
+  postId: string;
+  content: string;
+  token: string;
+  email: string;
+  commentId?: string;
+}

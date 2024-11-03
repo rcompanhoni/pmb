@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useComments } from "../hooks/useComments";
-import { Comment } from "../models/Comment";
+import { Comment } from "../types";
 import CommentItem from "./CommentItem";
 import CommentModal from "./CommentModal";
 import { useAuth } from "../../../context/AuthContext";
+import NoListItems from "../../../components/EmptyState";
+import EmptyState from "../../../components/EmptyState";
 
 interface CommentListProps {
   postId: string;
@@ -33,15 +35,21 @@ export default function CommentList({ postId }: CommentListProps) {
       </div>
 
       <div className="bg-gray-50 rounded-lg shadow-md p-4">
-        {isLoading && <p>Loading comments...</p>}
-
-        {isError && <p className="text-red-500">Error loading comments.</p>}
+        {isLoading && <EmptyState message="Loading comments..." />}
+        {isError && <EmptyState message="Error loading comments" />}
 
         {comments && comments.length > 0
           ? comments.map((comment: Comment) => (
-              <CommentItem comment={comment} key={comment.id} postId={postId} />
+              <div key={comment.id} className="mb-2 last:mb-0">
+                <CommentItem
+                  comment={comment}
+                  key={comment.id}
+                  postId={postId}
+                />
+              </div>
             ))
-          : !isLoading && !isError && <p>No comments available.</p>}
+          : !isLoading &&
+            !isError && <NoListItems message="No comments available." />}
       </div>
 
       <CommentModal

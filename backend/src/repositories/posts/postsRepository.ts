@@ -15,7 +15,7 @@ export const getAllPosts = async (
     .order('created_at', { ascending: false })
     .range(from, to);
 
-  // Apply search filter if search query is provided
+  // apply search filter if search query is provided
   if (search) {
     postsQuery = postsQuery.or(
       `title.ilike.%${search}%,content.ilike.%${search}%`,
@@ -24,7 +24,7 @@ export const getAllPosts = async (
 
   const { data: posts, error: postsError } = await postsQuery;
 
-  // Query for total count without pagination
+  // query for total count
   let countQuery = supabase
     .from('posts')
     .select('*', { count: 'exact', head: true });

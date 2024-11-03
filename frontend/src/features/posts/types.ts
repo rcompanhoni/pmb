@@ -7,3 +7,12 @@ export interface Post {
   hero_image_url: string;
   email: string;
 }
+
+export type PostFormData = {
+  title: string;
+  heroImageUrl: string;
+  content: string;
+  email?: string;
+  postId?: string;
+  token?: string;
+};

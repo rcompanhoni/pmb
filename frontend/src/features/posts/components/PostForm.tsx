@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import { PostFormData } from "../models/PostFormData";
+import { PostFormData } from "../types";
 import { useAuth } from "../../../context/AuthContext";
 import { z } from "zod";
+
+interface PostFormProps {
+  onSubmit: (data: PostFormData) => void;
+  initialData?: PostFormData;
+  isSubmitting: boolean;
+}
 
 // validation schema
 export const postSchema = z.object({
@@ -13,15 +19,14 @@ export const postSchema = z.object({
   content: z.string().min(1, "Content is required"),
 });
 
-interface PostFormProps {
-  onSubmit: (data: PostFormData) => void;
-  initialData?: PostFormData;
-}
-
-export default function PostForm({ onSubmit, initialData }: PostFormProps) {
+export default function PostForm({
+  onSubmit,
+  initialData,
+  isSubmitting,
+}: PostFormProps) {
   const { user } = useAuth();
   const [formData, setFormData] = useState<PostFormData>(
-    initialData || { title: "", heroImageUrl: "", content: "" } // either creating or editing an existing Post
+    initialData || { title: "", heroImageUrl: "", content: "" }
   );
   const [errors, setErrors] = useState<{
     [key in keyof PostFormData]?: string;
@@ -107,9 +112,12 @@ export default function PostForm({ onSubmit, initialData }: PostFormProps) {
 
       <button
         type="submit"
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        className={`bg-blue-500 text-white px-4 py-2 rounded ${
+          isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+        disabled={isSubmitting}
       >
-        Submit
+        {isSubmitting ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

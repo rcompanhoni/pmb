@@ -3,41 +3,27 @@ import Layout from "../components/Layout";
 import CommentList from "../features/comments/components/CommentList";
 import { usePost } from "../features/posts/hooks/usePost";
 import PostItem from "../features/posts/components/PostItem";
+import EmptyState from "../components/EmptyState";
 
 export default function PostDetail() {
   const { postId } = useParams<{ postId: string }>();
   const { data: post, isLoading, isError } = usePost(postId || "");
 
-  // loading state
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-screen">
-          <p>Loading post...</p>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <EmptyState message="Loading post..." />
         </div>
       </Layout>
     );
   }
 
-  // error state
-  if (isError) {
+  if (isError || !postId || !post) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-screen">
-          <p className="text-red-500">
-            Error loading the post. Please try again.
-          </p>
-        </div>
-      </Layout>
-    );
-  }
-
-  // post not found
-  if (!postId || !post) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center h-screen">
-          <p className="text-gray-500">Post not found.</p>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <EmptyState isError message="Error loading the post" />
         </div>
       </Layout>
     );

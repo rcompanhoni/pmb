@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../../utils/api";
-import { Post } from "../models/Post";
+import { Post } from "../types";
 
 const fetchPost = async (postId: string) => {
   const response = await apiClient.get(`/posts/${postId}`);

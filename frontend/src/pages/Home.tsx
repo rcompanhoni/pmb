@@ -1,6 +1,6 @@
 import Layout from "../components/Layout";
 import PostList from "../features/posts/components/PostList";
-import Instructions from "../features/posts/components/Instructions";
+import Instructions from "../components/Instructions";
 
 export default function Home() {
   return (

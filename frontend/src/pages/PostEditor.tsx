@@ -6,7 +6,7 @@ import PostForm from "../features/posts/components/PostForm";
 import { useCreatePost } from "../features/posts/hooks/useCreatePost";
 import { useUpdatePost } from "../features/posts/hooks/useUpdatePost";
 import { usePost } from "../features/posts/hooks/usePost";
-import { PostFormData } from "../features/posts/models/PostFormData";
+import { PostFormData } from "../features/posts/types";
 
 export default function PostEditor() {
   const { token } = useAuth();
@@ -18,6 +18,7 @@ export default function PostEditor() {
   const [initialValues, setInitialValues] = useState<PostFormData | undefined>(
     undefined
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (post && postId) {
@@ -29,28 +30,38 @@ export default function PostEditor() {
     }
   }, [post, postId]);
 
-  const handleSubmit = (data: PostFormData) => {
-    if (token) {
-      if (postId) {
-        // editing an existing post
-        updatePost(
-          { postId, ...data, token },
-          {
-            onSuccess: () => navigate("/"),
-          }
-        );
-      } else {
-        // creating a new post
-        createPost(
-          { ...data, token },
-          {
-            onSuccess: () => navigate("/"),
-          }
-        );
+  const handleCreate = (data: PostFormData) => {
+    setIsSubmitting(true);
+    createPost(
+      { ...data, token: token! },
+      {
+        onSuccess: () => {
+          navigate("/");
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
       }
-    } else {
+    );
+  };
+
+  const handleUpdate = (data: PostFormData) => {
+    setIsSubmitting(true);
+    updatePost(
+      { postId: postId!, ...data, token: token! },
+      {
+        onSuccess: () => navigate("/"),
+        onSettled: () => setIsSubmitting(false),
+      }
+    );
+  };
+
+  const handleSubmit = (data: PostFormData) => {
+    if (!token) {
       console.error("User not authenticated");
+      return;
     }
+    postId ? handleUpdate(data) : handleCreate(data);
   };
 
   if (isLoading && postId) return <p>Loading...</p>;
@@ -61,7 +72,11 @@ export default function PostEditor() {
         <h1 className="text-2xl font-bold mb-4">
           {postId ? "Edit Post" : "Create New Post"}
         </h1>
-        <PostForm onSubmit={handleSubmit} initialData={initialValues} />
+        <PostForm
+          onSubmit={handleSubmit}
+          initialData={initialValues}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </Layout>
   );

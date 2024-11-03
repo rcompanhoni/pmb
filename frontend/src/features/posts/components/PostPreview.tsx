@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Post } from "../models/Post";
+import { FaTrash, FaEdit } from "react-icons/fa";
+import { Post } from "../types";
 import { useAuth } from "../../../context/AuthContext";
 import { useDeletePost } from "../hooks/useDeletePost";
-import { FaTrash, FaEdit } from "react-icons/fa";
 
 interface PostPreviewProps {
   post: Post;
@@ -36,15 +36,19 @@ export default function PostPreview({ post }: PostPreviewProps) {
           className="w-full h-48 md:h-80 object-cover rounded-md mb-4 cursor-pointer"
         />
       </Link>
+
       <h2 className="text-2xl font-semibold">
         <Link to={`/posts/${post.id}`} className="hover:underline">
           {post.title}
         </Link>
       </h2>
+
       <p className="text-gray-600">{post.content.slice(0, 100)}...</p>
+
       <p className="text-sm italic">
         By <span className="font-bold">{post.email}</span>
       </p>
+
       <Link
         to={`/posts/${post.id}`}
         className="text-blue-500 hover:underline mt-2 inline-block"
@@ -61,6 +65,7 @@ export default function PostPreview({ post }: PostPreviewProps) {
             <FaEdit className="w-4 h-4" />
             <span className="hidden md:inline ml-1">Edit</span>
           </button>
+
           <button
             onClick={handleDelete}
             disabled={isDeleting}

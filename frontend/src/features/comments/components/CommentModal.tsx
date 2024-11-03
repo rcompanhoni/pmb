@@ -5,6 +5,7 @@ import { useCreateComment } from "../hooks/useCreateComment";
 import { useUpdateComment } from "../hooks/useUpdateComment";
 import { useAuth } from "../../../context/AuthContext";
 
+// validation schema
 const commentSchema = z.object({
   content: z.string().min(1, "Comment content cannot be empty"),
 });
@@ -33,6 +34,7 @@ export default function CommentModal({
     content: initialData?.content || "",
   });
   const [errors, setErrors] = useState<{ content?: string }>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -45,6 +47,51 @@ export default function CommentModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleCreateComment = () => {
+    setIsSubmitting(true);
+    createComment(
+      {
+        postId,
+        content: formData.content,
+        token: token || "",
+        email: user?.email || "",
+      },
+      {
+        onSuccess: () => {
+          onRequestClose();
+          setFormData({ content: "" });
+          onSuccess();
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
+      }
+    );
+  };
+
+  const handleUpdateComment = () => {
+    setIsSubmitting(true);
+    updateComment(
+      {
+        postId,
+        commentId: commentId!,
+        content: formData.content,
+        token: token || "",
+        email: user?.email || "",
+      },
+      {
+        onSuccess: () => {
+          onRequestClose();
+          setFormData({ content: "" });
+          onSuccess();
+        },
+        onSettled: () => {
+          setIsSubmitting(false);
+        },
+      }
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -52,40 +99,9 @@ export default function CommentModal({
     if (result.success) {
       setErrors({});
       if (initialData && commentId) {
-        // update comment if initialData is provided
-        updateComment(
-          {
-            postId,
-            commentId,
-            content: formData.content,
-            token: token || "",
-            email: user?.email || "",
-          },
-          {
-            onSuccess: () => {
-              onRequestClose();
-              setFormData({ content: "" });
-              onSuccess();
-            },
-          }
-        );
+        handleUpdateComment();
       } else {
-        // create comment instead
-        createComment(
-          {
-            postId,
-            content: formData.content,
-            token: token || "",
-            email: user?.email || "",
-          },
-          {
-            onSuccess: () => {
-              onRequestClose();
-              setFormData({ content: "" });
-              onSuccess();
-            },
-          }
-        );
+        handleCreateComment();
       }
     } else {
       const validationErrors: { content?: string } = {};
@@ -134,9 +150,12 @@ export default function CommentModal({
 
           <button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className={`bg-blue-500 text-white px-4 py-2 rounded ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isSubmitting}
           >
-            Submit
+            {isSubmitting ? "Submitting..." : "Submit"}
           </button>
         </div>
       </form>

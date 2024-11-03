@@ -5,7 +5,8 @@ export default function Instructions() {
       <ul className="space-y-2">
         <li>
           1. <strong>Browse without logging in:</strong> Non-logged users can
-          view posts and comments but cannot create, edit, or delete them.
+          search for posts, view posts, and read comments but cannot create,
+          edit, or delete them.
         </li>
         <li>
           2. <strong>Sign In/Sign Up:</strong> After logging in, you’ll have

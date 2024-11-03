@@ -4,20 +4,14 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import apiClient from "../../../utils/api";
-
-interface CreateCommentParams {
-  postId: string;
-  content: string;
-  token: string;
-  email: string;
-}
+import { CommentFormData } from "../types";
 
 const createComment = async ({
   postId,
   content,
   token,
   email,
-}: CreateCommentParams) => {
+}: CommentFormData) => {
   await apiClient.post(
     `/posts/${postId}/comments`,
     { content, email },
@@ -32,7 +26,7 @@ const createComment = async ({
 export const useCreateComment = (): UseMutationResult<
   void, // mutation returns no data
   Error, // type of Error thrown by the mutation
-  CreateCommentParams // parameter types
+  CommentFormData // parameter types
 > => {
   const queryClient = useQueryClient();
 
