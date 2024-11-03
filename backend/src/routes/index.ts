@@ -5,7 +5,7 @@ import commentsRoutes from './commentsRoutes';
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.json({ message: 'Base route' });
+  res.json({ message: 'Mini Blog API' });
 });
 
 router.use('/posts', postsRoutes);
