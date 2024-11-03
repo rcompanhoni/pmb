@@ -6,6 +6,7 @@ import CommentModal from "./CommentModal";
 import { useAuth } from "../../../context/AuthContext";
 import NoListItems from "../../../components/EmptyState";
 import EmptyState from "../../../components/EmptyState";
+import { useRealtimeComments } from "../hooks/useRealtimeComments"; // Import the new hook
 
 interface CommentListProps {
   postId: string;
@@ -15,6 +16,9 @@ export default function CommentList({ postId }: CommentListProps) {
   const { user } = useAuth();
   const { data: comments, isLoading, isError } = useComments(postId || "");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // subscribe to the comment Supabase table to update the comment list in real-time
+  useRealtimeComments(postId);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
