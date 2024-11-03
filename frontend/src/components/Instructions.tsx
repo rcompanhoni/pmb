@@ -9,8 +9,13 @@ export default function Instructions() {
           edit, or delete them.
         </li>
         <li>
-          2. <strong>Sign In/Sign Up:</strong> After logging in, you’ll have
-          access to additional options:
+          2. <strong>Sign Up:</strong> To sign up, simply provide an email
+          address and a password. Your account will be created immediately
+          without any additional verification steps.
+        </li>
+        <li>
+          3. <strong>Sign In:</strong> After signing in, you’ll have access to
+          additional options:
           <ul className="ml-4 mt-2 list-disc list-inside space-y-1">
             <li>
               Create a new post from the "Create New Post" button at the top of

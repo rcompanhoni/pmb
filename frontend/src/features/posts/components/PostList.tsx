@@ -28,14 +28,13 @@ export default function PostList() {
   const totalPages = Math.ceil((data?.totalCount || 0) / pageSize);
   usePrefetchNextPostsPage(page, pageSize, totalPages, search);
 
-  // handlle no items, loading and error states
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error loading posts.</p>;
-  if (!data?.posts.length) return <NoListItems message="No posts available." />;
-
   const handleCreatePost = () => {
     navigate("/post-editor");
   };
+
+  // handle loading and error states
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error loading posts.</p>;
 
   return (
     <div className="space-y-4">
@@ -48,9 +47,13 @@ export default function PostList() {
         </button>
       )}
 
-      {data?.posts.map((post: Post) => (
-        <PostPreview key={post.id} post={post} />
-      ))}
+      {!data?.posts.length ? (
+        <NoListItems message="No posts available." />
+      ) : (
+        data?.posts.map((post: Post) => (
+          <PostPreview key={post.id} post={post} />
+        ))
+      )}
 
       <PaginationControls
         currentPage={page}
